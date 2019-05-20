@@ -13,13 +13,23 @@ from scipy.stats import kurtosis, skew
 
 #Funções
 
-#Média
+#Médias
+#média das médias
 def media(lista_dif):
     lista_media = []
     for i in range(len(lista_dif)):
         lista_media.append((lista_dif[i] + lista_dif_index[i])/2)
     return lista_media
-        
+
+#média das janelas
+def mediax(lista_dif_index):
+    media = sum(lista_dif_index)/len(lista_dif_index)
+    return media
+def mediay(lista_dif):
+    media = sum(lista_dif)/len(lista_dif)
+    return media
+
+#funções para picos
 def peaks(lista):    
     #distancia = frequencia amostral
     peaks, _ = find_peaks(lista, distance=fs//2)
@@ -60,53 +70,59 @@ def plot_comport(lista, peaks):
 data = pd.read_csv('lista2.txt')
 data2 = pd.read_csv('lista3.txt')
 fs = 128
+J = 300 #5x60
+jfs = J*fs
 
 for w in range(0,1):
     ecg = np.load(data['nome'][w])
     ecg2 = np.load(data2['nome'][w])
     #janelamento
-    #precisa ser feito a partir do período de cada janela x frequencia amostral
+    #precisa ser feito a partir do período de cada janela = 5 min x frequencia amostral = 128hz
     #sendo T o período total da amostra
-    x = ecg[120000:]
-    k = ecg2[120000:]
+    T = len(ecg)
+    T2 = len(ecg2)    
+    aux = 120000
+    aux2 = aux + jfs
+    lista_media_x = []
+    lista_media_y = []
+    k_list = []
+    skew_list = []
     
-    #limiar
-    #aux = np.repeat(3*np.std(x), len(x))
     
-    peaks1 = peaks(x)       
-    s = x[peaks1]
-    numero1 = num_peaks(x, peaks1)
-    lista_dif = []
-    comport1 = comport(s, lista_dif, peaks1)
-    lista_dif_index = []
-    comport_index1 = comport_index(s, lista_dif_index, peaks1)
-    lista_media1 = media(lista_dif)    
-    #variancias
-    variancia1 = pd.Series(lista_media1).var()    
-    #curtose    
-    k1 = kurtosis(lista_media1)    
-    #coeficiente de assimetria    
-    skew1 = skew(lista_media1)
+    while(aux2<=len(ecg)):
+                
+        x = ecg[aux:aux2]
+        #k = ecg2[aux:aux]
+        
+        #limiar
+        #aux = np.repeat(3*np.std(x), len(x))
+        
+        peaks1 = peaks(x)       
+        s = x[peaks1]
+        numero1 = num_peaks(x, peaks1)
+        lista_dif = []
+        comport1 = comport(s, lista_dif, peaks1)
+        lista_dif_index = []
+        comport_index1 = comport_index(s, lista_dif_index, peaks1)
+        lista_media1 = media(lista_dif)    
+        #variancias
+        variancia1 = pd.Series(lista_media1).var()    
+        #curtose    
+        k = kurtosis(lista_media1)
+        k_list.append(k)
+        #coeficiente de assimetria    
+        skew_val = skew(lista_media1)
+        skew_list.append(skew_val)
+        
+        aux += jfs
+        aux2 += jfs
 
     
-    peaks2 = peaks(k)       
-    s2 = k[peaks2]
-    numero1 = num_peaks(k, peaks2)
-    lista_dif2 = []
-    comport2 = comport(s2, lista_dif2, peaks2)
-    lista_dif_index2 = []
-    comport_index2 = comport_index(s2, lista_dif_index2, peaks2)
-    lista_media2 = media(lista_dif2)    
-    #variancias
-    variancia2 = pd.Series(lista_media2).var()    
-    #curtose    
-    k2 = kurtosis(lista_media2)    
-    #coeficiente de assimetria    
-    skew2 = skew(lista_media2)
     
+    plt.plot(k_list,"o")
+    plt.plot(skew_list, "o")
     
-    plt.plot(k1,"o")
-    plt.plot(k2,"o")
+   # plt.plot(k2,"o")
     plt.show()
 
     
