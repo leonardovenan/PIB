@@ -94,13 +94,11 @@ for w in range(0,1):
     skew2_list = []
     
     
-    while(aux2<=len(ecg)):
-                
+    while(aux2<=len(ecg)):                
         x = ecg[aux:aux2]
-        #k = ecg2[aux:aux]
-        
+        #k = ecg2[aux:aux]        
         #limiar
-        #aux = np.repeat(3*np.std(x), len(x))
+        threshold = np.repeat(3*np.std(x), len(x))
         
         peaks1 = peaks(x)       
         s = x[peaks1]
