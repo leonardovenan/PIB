@@ -15,13 +15,13 @@ from scipy.stats import kurtosis, skew
 
 #Médias
 #média das médias
-def media(lista_dif):
+def media(lista_dif, lista_dif_index):
     lista_media = []
     for i in range(len(lista_dif)):
         lista_media.append((lista_dif[i] + lista_dif_index[i])/2)
     return lista_media
 
-#média das janelas
+#funções de médias das janelas
 def mediax(lista_dif_index):
     media = sum(lista_dif_index)/len(lista_dif_index)
     return media
@@ -85,8 +85,13 @@ for w in range(0,1):
     aux2 = aux + jfs
     lista_media_x = []
     lista_media_y = []
-    k_list = []
-    skew_list = []
+    media_var1 = []
+    media_var2 = []
+    lista_media_media = []
+    k1_list = []
+    k2_list = []
+    skew1_list = []
+    skew2_list = []
     
     
     while(aux2<=len(ecg)):
@@ -104,27 +109,47 @@ for w in range(0,1):
         comport1 = comport(s, lista_dif, peaks1)
         lista_dif_index = []
         comport_index1 = comport_index(s, lista_dif_index, peaks1)
-        lista_media1 = media(lista_dif)    
+        #medias
+        #media em x
+        media_index = mediax(lista_dif_index)
+        lista_media_x.append(media_index)
+        #media em y
+        media_pow = mediay(lista_dif)
+        lista_media_y.append(media_pow)
         #variancias
-        variancia1 = pd.Series(lista_media1).var()    
+        variancia1 = pd.Series(lista_dif_index).var()
+        media_var1.append(variancia1)
+        variancia2 = pd.Series(lista_dif).var()
+        media_var2.append(variancia2)
         #curtose    
-        k = kurtosis(lista_media1)
-        k_list.append(k)
+        k1 = kurtosis(lista_dif_index)
+        k1_list.append(k1)
+        k2 = kurtosis(lista_dif)
+        k2_list.append(k2)
+        
         #coeficiente de assimetria    
-        skew_val = skew(lista_media1)
-        skew_list.append(skew_val)
+        skew_val1 = skew(lista_dif_index)
+        skew1_list.append(skew_val1)
+        skew_val2 = skew(lista_dif)
+        skew2_list.append(skew_val2)
         
         aux += jfs
         aux2 += jfs
 
+    #médias gerais
+    media_geral = media(lista_media_y, lista_media_x)
+    media_variancia = media(media_var1, media_var2)
+    media_k = media(k1_list, k2_list)
+    media_skew = media(skew1_list, skew2_list)
+        
     
+    #plt.plot(k1_list,"o")
+    #plt.plot(skew1_list, "o")    
     
-    plt.plot(k_list,"o")
-    plt.plot(skew_list, "o")
-    
-   # plt.plot(k2,"o")
-    plt.show()
+    #plt.plot(k2,"o")
 
+    plt.plot(media_k, "--")
+    plt.show()
     
     
     
